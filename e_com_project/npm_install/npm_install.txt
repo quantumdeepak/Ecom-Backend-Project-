@@ -1,0 +1,6 @@
+express
+mongoose
+mongodb
+postman-request
+jsonwebtoken
+bcryptjs
