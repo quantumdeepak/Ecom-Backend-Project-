@@ -1,8 +1,10 @@
 const user_model = require('../models/user.model');
+const jwt = require('jsonwebtoken');
+const auth_config = require('../configs/auth.config');
 
 // Create a middleware to check if the request body is proper and correct
 
-const  varify_sighup_body = (req, res, next) => {
+const  varify_signup_body = (req, res, next) => {
     try{
         // 1. check for the name
         if(!req.body.name){
@@ -71,9 +73,61 @@ const varify_signin_body = (req, res, next) =>{
 
 
 
+
+const verify_token = (req, res, next) => {
+    // 1. Check if the token is present in the header
+    const token = req.headers['x-access-token'];
+    if (!token) {
+        return res.status(401).send({ message: 'Token is required' });
+    }
+
+    // 2. Verify if the token is valid
+    jwt.verify(token, auth_config.secret, async (err, decoded) => {
+        if (err) {
+            return res.status(401).send({ message: 'Invalid token' });
+        }
+
+        // 3. Check if the user exists in the database
+        try {
+            const user = await user_model.findById(decoded.id);
+            if (!user) {
+                return res.status(401).send({ message: 'User not found' });
+            }
+            
+            // If everything is fine, proceed to the next middleware or route handler
+            req.user = user; // Optionally attach user to the request object for later use
+            // Set thte user in the request object
+            req.user = user;
+            next();
+        } catch (dbError) {
+            console.error('Error while verifying user:', dbError);
+            return res.status(500).send({ message: 'Internal server error' });
+        }
+    });
+};
+
+
+const is_admin = (req, res, next) => {
+    const user = req.user;
+    if(user.userType !== 'ADMIN'){
+        return res.status(403).send({message: 'Only ADMIN is allowed to perform this operation'});
+    }else{
+        next();
+    }
+}
+
+// const is_admin = (req, res, next) => {
+//     if(req.user.userType !== 'ADMIN'){
+//         return res.status(403).send({message: 'Only ADMIN is allowed to perform this operation'});
+//     }
+//     next();
+// }
+
 // module.exports = varify_sighup_body;
 
 module.exports = {
     varify_signup_body : varify_signup_body,
-    varify_signin_body : varify_signin_body
+    varify_signin_body : varify_signin_body,
+    verify_token : verify_token,
+    is_admin : is_admin
 }

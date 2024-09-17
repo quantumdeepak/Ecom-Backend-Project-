@@ -26,9 +26,7 @@ module.exports = (app) =>{
     // app.post('/signup', auth_controller.signup);
     app.post('/ecom/api/v1/auth/signup', [authmw.varify_signup_body] ,  auth_controller.signup);
 
-
     // Route for login
     app.post('/ecom/api/v1/auth/signin',[authmw.varify_signin_body], auth_controller.signin);
-
 
 } 

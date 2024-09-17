@@ -92,6 +92,8 @@ async function fun_init(){
 // Stich the routes to the server    => connecting the route to the app server
 
 require('./routes/auth.routes')(app);
+require('./routes/category.routes')(app);
+
 // calling the routes and passing app object to the routes
 
 app.use(express.json());
