@@ -3,6 +3,7 @@
 
 // const bcrypt = require('bcryptjs');
 // const user_model = require('../models/user.model');
+// const jwt = require('jsonwebtoken');
 
 // // This method is used to create or register a new user
 
@@ -48,6 +49,8 @@
 
 const bcrypt = require('bcryptjs');
 const user_model = require('../models/user.model');
+const jwt = require('jsonwebtoken');
+const secret_key = require('../configs/auth.config');
 
 // // This method is used to create or register a new user
 // exports.signup = async (req, res) => {
@@ -118,3 +121,51 @@ exports.signup = async (req, res) => {
         res.status(500).send({ message: 'Internal server error' });
     }
 }
+
+
+exports.signin = async (req, res) => {
+
+
+    // check for valid userId
+
+    const user = await user_model.findOne({ userId: req.body.userId })
+
+    if (!user) {
+        return res.status(400).send({ message: 'Invalid userId' });
+    } 
+
+
+    // check for valid password
+
+
+    const isPasswordValid = bcrypt.compareSync(req.body.password, user.password);
+    // This is Sync function so no await is required
+
+    if (!isPasswordValid) {
+        return res.status(400).send({ message: 'Invalid password' });
+    }
+
+     
+
+    // generate the token with TTL  and return
+
+    const token = jwt.sign({
+        id: user._id,
+        
+    } ,
+    //  "secret code to generate token",
+    secret_key.secret,
+    {
+        expiresIn: 120
+    })
+
+
+    res.status(200).send({
+        name: user.name,
+        userId: user.userId,
+        email: user.email,
+        userType: user.userType,
+        acess_token: token
+    });
+}
+

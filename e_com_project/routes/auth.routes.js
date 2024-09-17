@@ -2,7 +2,7 @@
 
 
 const auth_controller = require('../controllers/auth.controller');
-
+const authmw = require('../middlewares/auth.mw');
 
 // the post request will be made to the /signup route
 // we need to intercet the request and call the signup method from the controller
@@ -24,5 +24,11 @@ module.exports = (app) =>{
 
     // and the signup controller is defined in the auth.controller.js file
     // app.post('/signup', auth_controller.signup);
-    app.post('/ecom/api/v1/auth/signup', auth_controller.signup);
+    app.post('/ecom/api/v1/auth/signup', [authmw.varify_signup_body] ,  auth_controller.signup);
+
+
+    // Route for login
+    app.post('/ecom/api/v1/auth/signin',[authmw.varify_signin_body], auth_controller.signin);
+
+
 } 
