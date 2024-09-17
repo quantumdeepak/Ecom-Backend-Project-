@@ -4,12 +4,18 @@ const express = require('express');
 // The Type of the express is function
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
-
+const bodyParser = require('body-parser');
 const user_model = require('./models/user.model');
 const serverConfig = require('./configs/server.config');
 const db_config = require('./configs/db.config');
 
 const app = express();
+app.use(express.json());
+// app.use(bodyParser.json());
+// This is a built-in middleware function in Express. It parses incoming requests with JSON payloads and is based on body-parser.
+// When ever we read a JSON treat as js object
+
+
 
 // Create an admin user if not exists
 // Make Connection with the database mongodb
@@ -81,9 +87,22 @@ async function fun_init(){
 }
 
 
+
+
+// Stich the routes to the server    => connecting the route to the app server
+
+require('./routes/auth.routes')(app);
+// calling the routes and passing app object to the routes
+
+app.use(express.json());
+
+
 // Start the server
 // this port number is custimized can be changed
 // so will keep all such info in config folder
 app.listen(serverConfig.PORT , ()=>{
     console.log('Server is running on port ' + serverConfig.PORT);
 });
+
+
+// user = user_model.create()
